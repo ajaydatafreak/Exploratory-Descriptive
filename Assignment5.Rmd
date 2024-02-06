@@ -1,0 +1,1034 @@
+---
+title: "Assignment_5"
+author: "Ajay Kanubhai Patel"
+date: "2022-12-09"
+output:
+  word_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#Loading the package
+
+```{r}
+#Load packages to convert file in PDF.
+
+if(!require(tinytex)){install.packages("tinytex")}
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/Assignment5')
+
+```
+
+This section is for the basic set up. It will clear all the plots, the
+console and the workspace. It also sets the overall format for numbers.
+
+```{r}
+if(!is.null(dev.list())) dev.off()
+cat("\014") 
+rm(list=ls())
+options(scipen=9)
+```
+
+#To read Excel file in R data frame.
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+
+```{r}
+if(!require(pastecs)){install.packages("pastecs")}
+library("pastecs")
+
+if(!require(lattice)){install.packages("lattice")}
+library("lattice")
+
+if(!require(vcd)){install.packages("vcd")}
+library("vcd")
+
+if(!require(HSAUR)){install.packages("HSAUR")}
+library("HSAUR")
+
+if(!require(rmarkdown)){install.packages("rmarkdown")}
+library("rmarkdown")
+
+
+if(!require(ggplot2)){install.packages("ggplot2")}
+library("ggplot2")
+
+if(!require(klaR)){install.packages("klaR")}
+library("klaR")
+
+if(!require(partykit)){install.packages("partykit")}
+library("partykit")
+
+```
+# To get working directory
+# To read PROG8430_Assign04_22F.txt file located at 
+# "D:/Final Assignment/DATA/Assignment5"
+
+```{r}
+
+getwd()  
+
+
+Assignment05_AP <- read.table(file = "D:/Final Assignment/DATA/Assignment5/PROG8430_Assign05_22F.txt", header = TRUE, sep = ",")
+
+head(Assignment05_AP)
+
+str(Assignment05_AP)
+
+```
+
+
+
+1.Preliminary Data Preparation
+
+  1(1) Rename all variables with your initials appended.
+  
+  # My name is Ajay Patel so I have appended all column name
+  #with _AP
+
+```{r}
+
+colnames(Assignment05_AP) <- paste(colnames(Assignment05_AP), "AP", sep = "_") 
+
+
+head(Assignment05_AP)
+
+
+```
+Q1 (2). As demonstrated in class and conducted in previous assignments, make
+quick exploratory graphs of all variables. Remember to adjust
+categorical variables to factor variables
+
+First, I am going to convert Character variables into the factor variables.
+There are three character variables namely Dom_AP, Haz_AP and Car_AP
+
+```{r}
+
+#To find character variables and convert into the factor variables.
+
+Assignment05_AP <- as.data.frame(unclass(Assignment05_AP), stringsAsFactors = TRUE)
+#let's check whether the character variables converted into factor variables
+#or not
+
+str(Assignment05_AP)
+
+```
+
+exploratory graphs of all variables
+
+First, we gonna check for outlier with the help of boxplot and density plot.
+
+
+```{r}
+
+#FOR TIME FOR DELIVERY
+boxplot(Assignment05_AP$Del_AP,
+       main="Box Plot of Time For Delivery In Days",
+        xlab="DAYS",
+        col="blue", horizontal=TRUE, pch=20)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment05_AP$Del_AP,
+       main="Box Plot of Time For Delivery In Days",
+        xlab="DAYS",
+        col="blue", horizontal=TRUE, pch=20, range = 0.5)
+
+
+densityplot( ~ Assignment05_AP$Del_AP, pch=1)
+
+# FOR VINTAGE OF PRODUCT
+
+boxplot(Assignment05_AP$Vin_AP,
+       main="Box Plot of VINTAGE OF PRODUCT",
+        xlab="how long it has been in the warehouse",
+        col="red", horizontal=TRUE, pch=21)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment05_AP$Vin_AP,
+       main="Box Plot of VINTAGE OF PRODUCT",
+        xlab="how long it has been in the warehouse",
+        col="red", horizontal=TRUE, pch=21, range = 0.5)
+
+
+densityplot( ~ Assignment05_AP$Vin_AP, pch=2)
+
+
+
+# FOR Pkg
+
+boxplot(Assignment05_AP$Pkg_AP,
+       main="Box Plot of  Pkg",
+        xlab="packages of product have been ordered",
+        col="brown",horizontal=TRUE, pch=22)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment05_AP$Pkg_AP,
+       main="Box Plot of Pkg",
+        xlab="packages of product have been ordered",
+        col="brown",horizontal=TRUE, pch=22, range = 0.5)
+
+densityplot( ~ Assignment05_AP$Pkg_AP, pch=3)
+
+# FOR Cst
+
+boxplot(Assignment05_AP$Cst_AP,
+       main="Box Plot of Cst",
+        xlab="orders the customer has made in the past",
+        col=1,horizontal=TRUE, pch=23)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment05_AP$Cst_AP,
+       main="Box Plot of Cst",
+        xlab="orders the customer has made in the past",
+        col=1,horizontal=TRUE, pch=23, range = 0.5)
+
+densityplot( ~ Assignment05_AP$Cst_AP, pch=4)
+
+# FOR Mil_AP
+
+boxplot(Assignment05_AP$Mil_AP,
+       main="Box Plot of Mil_AP",
+        xlab="Distance the order needs to be delivered in km",
+        col=2,horizontal=TRUE, pch=24)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment05_AP$Mil_AP,
+       main="Box Plot of Mil_AP",
+        xlab="Distance the order needs to be delivered in km",
+        col=2,horizontal=TRUE, pch=24, range = 0.5)
+
+densityplot( ~ Assignment05_AP$Mil_AP, pch=5)
+
+```
+from box plot and density plot all the numeric varibles seem fine so I keep
+them as they are.
+
+let's check correlation between two variables.
+There are five numeric variables so we have to check for 5(5-1)/2 = 10 pairs.
+
+```{r}
+
+xyplot(Del_AP~Vin_AP, data = Assignment05_AP, col="red", pch=20)
+xyplot(Del_AP~Pkg_AP, data = Assignment05_AP, col="blue", pch=21)
+xyplot(Del_AP~Cst_AP, data = Assignment05_AP, col="black", pch=22)
+xyplot(Del_AP~Mil_AP, data = Assignment05_AP, col="orange", pch=23)
+xyplot(Vin_AP~Pkg_AP, data = Assignment05_AP, col="black", pch=24)
+xyplot(Vin_AP~Cst_AP, data = Assignment05_AP, col=1, pch=25)
+xyplot(Vin_AP~Mil_AP, data = Assignment05_AP, col=2, pch=1)
+xyplot(Pkg_AP~Cst_AP, data = Assignment05_AP, col=3, pch=2)
+xyplot(Pkg_AP~Mil_AP, data = Assignment05_AP, col=4, pch=3)
+xyplot(Cst_AP~Mil_AP, data = Assignment05_AP, col=5, pch=4)
+
+```
+ Conclusion from xyplot:  There is no strong correlation between two variable
+                          except Del_AP and Mil_AP.
+ 
+ 
+ NOTE: Here, rest of the variables are binary so we cannot use barplot
+       for check correlation of one with another variable.
+       
+Let's check skewness of the given numeric variables.
+  
+
+```{r}
+
+#For Del_AP
+hist(Assignment05_AP$Del_AP,
+       main="Histogram of Time For Delivery In Days",
+        xlab="DAYS",
+        col="blue", pch=20)
+
+
+# FOR VINTAGE OF PRODUCT
+
+hist(Assignment05_AP$Vin_AP,
+       main="Histogram of VINTAGE OF PRODUCT",
+        xlab="how long it has been in the warehouse",
+        col="red", pch=21)
+
+
+# FOR Pkg
+
+hist(Assignment05_AP$Pkg_AP,
+       main="Histogram of  Pkg",
+        xlab="packages of product have been ordered",
+        col="brown", pch=22)
+
+# FOR Cst
+
+hist(Assignment05_AP$Cst_AP,
+       main="Histogram of Cst",
+        xlab="orders the customer has made in the past",
+        col=1, pch=23)
+
+
+# FOR Mil_AP
+
+hist(Assignment05_AP$Mil_AP,
+       main="Histogram of Mil_AP",
+        xlab="Distance the order needs to be delivered in km",
+        col=2, pch=24)
+
+
+```
+
+Conclusion from Histogram: Pkg_AP variable is right skewed. others seem fine.
+
+let's create barplot for factor variables.
+
+
+```{r}
+
+library(dplyr)
+table(Assignment05_AP$Dom_AP) %>% barplot(col = "red")
+table(Assignment05_AP$Haz_AP) %>% barplot(col = "black")
+table(Assignment05_AP$Car_AP) %>% barplot(col = "brown")
+
+```
+
+Conclusion From Barplot:
+
+  1. There are more products which are manufactured in Canada.
+  2. Majority of products are non-hazardous.
+  3. number of delivery done by Fed Post and M-Press is almost same.
+  
+Q1 (3) Create a new variable in the dataset called OT_[Intials] which will have
+a value of 1 if Del ≤ 10 and 0 otherwise. If you have forgotten how to
+do this, the code to accomplish it is included in the appendix.
+
+
+
+```{r}
+
+OT_AP <- as.factor(ifelse(Assignment05_AP$Del_AP <= 10, 1,0))
+head(OT_AP)
+summary(OT_AP) # To see how many '0' and '1'.
+
+```
+
+2. Exploratory Analysis
+
+Q2 (1) Correlations: Create numeric correlations (as demonstrated) and
+comment on what you see. Are there co-linear variables?
+
+High correlation between two variables means they have similar trends
+and are likely to carry similar information.
+
+Pearson,Spearman,and Kendall methods can be used to measure the degree of
+association between two variables.
+
+We can only check for numerical and we have 5 column with numeric data so
+
+n(n-1)/2 (5*4/2 = 10) combinations should be checked.
+
+
+
+
+```{r}
+
+#We used Spearman because it is non-parametric
+
+cor(Assignment05_AP$Del_AP, Assignment05_AP$Vin_AP)
+cor.test(Assignment05_AP$Del_AP, Assignment05_AP$Vin_AP, method="spearman")
+
+cor(Assignment05_AP$Del_AP, Assignment05_AP$Pkg_AP)
+cor.test(Assignment05_AP$Del_AP, Assignment05_AP$Pkg_AP, method="spearman")
+
+cor(Assignment05_AP$Del_AP, Assignment05_AP$Cst_AP)
+cor.test(Assignment05_AP$Del_AP, Assignment05_AP$Cst_AP, method="spearman")
+
+cor(Assignment05_AP$Del_AP, Assignment05_AP$Mil_AP)
+cor.test(Assignment05_AP$Del_AP, Assignment05_AP$Mil_AP, method="spearman")
+
+cor(Assignment05_AP$Vin_AP, Assignment05_AP$Pkg_AP)
+cor.test(Assignment05_AP$Vin_AP, Assignment05_AP$Pkg_AP, method="spearman")
+
+cor(Assignment05_AP$Vin_AP, Assignment05_AP$Cst_AP)
+cor.test(Assignment05_AP$Vin_AP, Assignment05_AP$Cst_AP, method="spearman")
+
+cor(Assignment05_AP$Vin_AP, Assignment05_AP$Mil_AP)
+cor.test(Assignment05_AP$Vin_AP, Assignment05_AP$Mil_AP, method="spearman")
+
+cor(Assignment05_AP$Pkg_AP, Assignment05_AP$Cst_AP)
+cor.test(Assignment05_AP$Pkg_AP, Assignment05_AP$Cst_AP, method="spearman")
+
+cor(Assignment05_AP$Pkg_AP, Assignment05_AP$Mil_AP)
+cor.test(Assignment05_AP$Pkg_AP, Assignment05_AP$Mil_AP, method="spearman")
+
+cor(Assignment05_AP$Cst_AP, Assignment05_AP$Mil_AP)
+cor.test(Assignment05_AP$Cst_AP, Assignment05_AP$Mil_AP, method="spearman")
+
+```
+Conclusion: There is strong positive linear relationship between Del_Ap
+            and Mil_AP.
+            
+            
+            
+Q2(2) Identify the most significant predictor of an on time delivery and
+provide statistical evidence (in addition to the correlation coefficient)
+that suggest they are associated with an on time delivery (Think of the 
+contingency tables bar plots we did in class).
+
+both of the factors are categorical (rather than numeric variables).
+
+
+
+```{r}
+
+str(Assignment05_AP)
+
+#Contingency table for OT_AP and Dom_AP.
+
+ODTbl_Rct_AP <- table(Assignment05_AP$Dom_AP,OT_AP, dnn=list("Time on Delivery","Vintage Of Product"))
+
+ODTbl_Rct_AP
+
+prop.table(ODTbl_Rct_AP,2)
+
+#Vertical Bar Chart
+barplot(prop.table(ODTbl_Rct_AP,2), xlab='Delivered 0n time?',ylab='Produce in Canada or not.',main="Delivered on Time or not vs Dom_AP",
+col=c(5,6)
+,legend=rownames(ODTbl_Rct_AP), args.legend = list(x = "topleft"))
+
+ODchisqRct_AP <- chisq.test(Assignment05_AP$Dom_AP,OT_AP, correct=FALSE)
+ODchisqRct_AP
+
+#Contingency table for OT_AP and Haz_AP.
+
+OHTbl_Rct_AP <- table(Assignment05_AP$Haz_AP,OT_AP, dnn=list("Delivery on time?","Hazardous or not"))
+
+OHTbl_Rct_AP
+
+prop.table(OHTbl_Rct_AP,2)
+
+#Vertical Bar Chart
+barplot(prop.table(OHTbl_Rct_AP,2), xlab='Delivered 0n time?',ylab='Product is hazardous or not.',main="Delivered on Time or not vs Haz_AP",
+col=c(3,4)
+,legend=rownames(OHTbl_Rct_AP), args.legend = list(x = "topleft"))
+
+OHchisqRct_AP <- chisq.test(Assignment05_AP$Haz_AP,OT_AP, correct=FALSE)
+OHchisqRct_AP
+
+#Contingency table for OT_AP and Car_AP.
+
+OCTbl_Rct_AP <- table(Assignment05_AP$Car_AP,OT_AP, dnn=list("Delivered 0n time?","Whcih carrier delivered"))
+
+OCTbl_Rct_AP
+
+prop.table(OCTbl_Rct_AP,2)
+
+#Vertical Bar Chart
+barplot(prop.table(OCTbl_Rct_AP,2), xlab='Delivered 0n time?',ylab='Delivered by which carrier',main="Delivered on Time or not vs Car_AP",
+col=c(1,2)
+,legend=rownames(OCTbl_Rct_AP), args.legend = list(x = "topleft"))
+
+OCchisqRct_AP <- chisq.test(Assignment05_AP$Car_AP,OT_AP, correct=FALSE)
+OCchisqRct_AP
+
+
+```
+
+Conclusion: 1.More product are delivered on time when produced in Canada. while,
+              Product produced outside of Canada mostly delivered not on time.
+              
+              Product manufactured in Canada and delivered on Time: 2018
+              Product not manufactured in Canada and delivered on Time:718
+              Product manufactured outside of Canada and not delivered on Time:
+              1176
+              Product manufactured in Canada and not  delivered on Time:2420
+              From Chi-Squared,p value is below 0.05 so we van reject Null 
+              Hypothesis and say there is correlation between OT_AP and Dom_AP.
+            
+            2. When product falls under Hazardous category then they are not
+               delivered on time compared to product falls under non-hazardous 
+               category.
+               
+               Hazardous and delivered on time:594
+               Hazardous and not delivered on time:959
+               non- Hazardous and delivered on time:2142
+               non-Hazardous and not delivered on time:2637
+               
+              From Chi-Squared,p value is below 0.05 so we van reject Null 
+              Hypothesis and say there is correlation between OT_AP and Haz_AP.
+               
+            3.Around 60% products are not delivered on time by Fed Post so we 
+              can say M-Press delivery carrier is best when delivery on time is
+              the priority.
+              
+              Fed-Post and delivered on Time:933
+              Fed-Post and not delivered on Time:2193
+              M-press and delivered on Time:1803
+              M-press and not delivered on Time:1403
+              
+              From Chi-Squared,p value is below 0.05 so we van reject Null 
+              Hypothesis and say there is correlation between OT_AP and Car_AP.
+            
+
+
+
+
+-------------------------------------------------------------------------
+Q3 Model Development
+As demonstrated in class, create two logistic regression models.
+1. A full model using all of the variables.
+2. An additional model using backward selection.
+For each model, interpret and comment on the main measures we discussed in class:
+(1) AIC
+(2) Deviance
+(3) Residual symmetry
+(4) z-values
+(5) Parameter Co-Efficients
+Based on your preceding analysis, recommend which model should be selected 
+and explain why.
+
+
+Here, A full model using all of the variables I am calling it Model-1
+
+```{r}
+
+#Here, we need to drop Del_AP as we are building model taking OT_AP as a 
+#dependent variable which is created from Del_AP.
+
+Assignment05_AP <- Assignment05_AP[-c(1)]
+str(Assignment05_AP)
+
+#model with all the variables.
+Fullglm.fit_AP <- glm(OT_AP ~ ., data=Assignment05_AP, family = "binomial")
+
+summary(Fullglm.fit_AP)
+
+#for my knowledge I am experimenting by removing and adding variables
+#glm.fit_AP1 <- glm(OT_AP ~ Vin_AP + Pkg_AP + Cst_AP + Dom_AP + Haz_AP + Car_AP,data=Assignment05_AP, family = "binomial")
+
+#summary(glm.fit_AP1)
+
+#glm.fit_AP2 <- glm(OT_AP ~ Vin_AP + Pkg_AP + Mil_AP + Dom_AP + Haz_AP + Car_AP,data=Assignment05_AP, family = "binomial")
+
+#summary(glm.fit_AP2)
+
+#glm.fit_AP3 <- glm(OT_AP ~  Pkg_AP + Dom_AP + Haz_AP + Car_AP,data=Assignment05_AP, family = "binomial")
+
+#summary(glm.fit_AP3)
+
+```
+Conclusion:
+
+Here, number of iteration is 6 which is good.
+
+(1) AIC - Which indicates Measure of fitness and lower is the better.
+
+(2) Deviance - Null deviance indicates errors when we just make assumption
+               and Residual deviance tell us about summarization of errors in
+               particualr model.
+               Here, Residual deviance is smaller than Null deviance and
+               difference between them is 4555 which is high so our model is 
+               good.
+               
+               
+(3) Residual symmetry - From 1Q, Median, and 3Q, Residuals are symmetrical.
+
+(4) z-values - From p valueof z-test, all variables are statistically
+               significant but Pkg_AP which has p-value 0.2491
+               
+               
+(5) Parameter Co-Efficients - generally it is compared with correlation value
+                            and Mil_AP is in positive linear relation but this
+                            model gives negative co-efficient for Mil_AP which
+                            is not good sign.
+                           Moreover, Dom_ap * 1 (if I then -0.7614, if C then 0)
+                          Haz_AP * 1 (if N then 0.5528, if H then 0)
+                          Car_AP * 1 (if M-Press then 2.41. if Fed Post then 0)
+
+```{r}
+
+#Using Backward Selection (Call it Model-2)
+
+Backstep.fit_AP <- step(Fullglm.fit_AP, direction = "backward")
+summary(Backstep.fit_AP)
+
+```
+
+Conclusion:
+
+Regarding Model: when model is constructed with all variable than AIC value is 
+                 4121.95. in step-2, if we eliminate Pkg_AP then we will get
+                 lower AIC value which is 4121.27. Further, there is no change
+                 in AIC when we eliminate variables which are left in step-2 so
+                 Process is stopped.
+
+Here, number of iteration is 6 which is good.
+
+Model-2 summary
+
+(1) AIC - Which indicates Measure of fitness and lower is the better.
+          (right now cannot say anything withoud comparing value of AIC with
+          other model which is built on same dataset.)
+
+(2) Deviance - Null deviance indicates errors when we just make assumption
+               and Residual deviance tell us about summarization of errors in
+               particualr model.
+               Here, Residual deviance is smaller than Null deviance and
+               difference between them is 4553.6 which is high so our model is 
+               good.(Still we can see how better this model is by comparing
+               another model built on same dataset).
+               
+               
+(3) Residual symmetry - From 1Q, Median, and 3Q, Residuals are symmetrical.
+
+(4) z-values - From p value of z-test, all variables are statistically
+               significant.
+               
+               
+(5) Parameter Co-Efficients - generally it is compared with correlation value
+                            and Mil_AP is in positive linear relation but this
+                            model gives negative co-efficient for Mil_AP which
+                            is not good sign.
+                           Moreover, Dom_ap * 1 (if I then -0.7605, if C then 0)
+                          Haz_AP * 1 (if N then 0.5526, if H then 0)
+                          Car_AP * 1 (if M-Press then 2.41. if Fed Post then 0)
+
+
+-------------------------------------------------------------------------
+
+Comparing both model and conclusion:
+
+From Number of Fisher Scoring iterations both model are good.
+
+AIC: From AIC value, backward model(Model-2) is slightly better
+     (As lower the AIC the better the model is). However, there 
+     is really small difference. (Model-1: 4121.9 and Model-2: 4121.3)
+     
+deviances: Model-1 has slightly high difference than model-2 for deviance so
+           Model-1 is slightly better in terms of deviances.
+           
+Residucals: in both models, residuals are symmetrical.
+
+Z-values: From p value of Z test, Model-2 is better than Model-1 as in Model-2
+          all the variables have p value for z test in 0.05 so all variables
+          are significant.
+
+Parameter Co-Efficients - in terms of co-efficients both models has Mil_AP
+negative but in positive correlation with Del_AP. 
+however, model-2 smaller in size than Model-1.
+
+Overall, both models seem fine but I will choose model-2 from above conclusion
+of various factors.
+
+
+
+---------------------------------------------------------------------------------     
+PART-B
+
+Logistic Regression – Backward
+1. As above, use the step option in the glm function to fit the model
+   (using backward selection).
+2. Summarize the results in a Confusion Matrix.
+3. As demonstrated in class, calculate the time (in seconds) it took to fit 
+   the model and include this in your summary.
+
+#NOTE: I am calling this model as Model-A in further discussion and comparisons.
+
+
+```{r}
+
+start_time_AP <- Sys.time()
+
+Fullglm.fit_AP1 <- glm(OT_AP ~ ., data=Assignment05_AP, family = "binomial",na.action=na.omit)
+  
+Backstep.fit_AP1 <- step(Fullglm.fit_AP, direction = "backward")
+
+  
+end_time_AP <- Sys.time()
+  
+Backglm_Time_AP <- end_time_AP - start_time_AP
+
+Backglm_Time_AP
+  
+summary(Backstep.fit_AP1)
+
+```
+
+Summarize the results in a Confusion Matrix.
+
+
+```{r warning=FALSE}
+
+resp_glm_AP <- predict(Backstep.fit_AP1, type="response")   
+  Class_glm_AP <- ifelse(resp_glm_AP > 0.5,"1","0")           
+  CF_GLM_AP <- table(OT_AP, Class_glm_AP,
+                dnn=list("Act OT_AP","Predicted") ) 
+  CF_GLM_AP
+  
+BackTP_AP <- CF_GLM_AP[2,2]
+BackTN_AP <- CF_GLM_AP[1,1]
+BackFP_AP <- CF_GLM_AP[1,2]
+BackFN_AP <- CF_GLM_AP[2,1]
+
+BackAccuracy_AP <- (BackTP_AP + BackTN_AP) / 6332
+BackAccuracy_AP
+```
+here TP = 2256, TN = 3164, FP = 432, FN = 480
+
+1.Accuracy of Backward = TP + TN / Total = (3164 + 2268)/ 6332 = 0.8559 
+
+2.Miss Classification Rate = FP + FN / Total = (432 + 480) / 6332 = 0.1440
+
+3.Sensitivity = TP / (TP + FN) = 2256 / (2256 + 480) = 0.8245
+
+4.Specificity = TN / (TN + FP) = 3164 / (3164 + 432) = 0.8798
+
+5.Precision = TP / (TP + FP) = 2256 / (2256 + 432) = 0.8392
+
+6.Prevalance = Actual '1' / Total = (2256 + 480) / 6332 = 0.4320 
+
+
+As demonstrated in class, calculate the time (in seconds) it took to fit 
+the model and include this in your summary.
+   
+   
+```{r}
+
+print(paste("the time (in seconds) it took to fit the Logistic Regression – Backward:", Backglm_Time_AP))
+
+```
+
+
+----------------------------------------------------------------------  
+
+Naïve-Bayes Classification
+1. Use all the variables in the dataset to fit a Naïve-Bayesian classification 
+   model.
+2. Summarize the results in a Confusion Matrix.
+3. As demonstrated in class, calculate the time (in seconds) it took to fit the
+   model and include this in your summary.
+   
+#NOTE: I am calling this model as Model-B in further discussion and comparisons.
+
+```{r message=FALSE, warning=FALSE}
+
+NBstart_time_AP <- Sys.time()
+  
+NB.fit_AP <- NaiveBayes(OT_AP ~ . ,data = Assignment05_AP, na.action=na.omit)
+  
+NBend_time_AP <- Sys.time()
+  
+NB_Time_AP <- NBend_time_AP - NBstart_time_AP
+
+NB_Time_AP
+  
+pred_bay_AP <- predict(NB.fit_AP,Assignment05_AP)
+ 
+#Creates Confusion Matrix
+
+CF_NB_AP <- table(Actual=OT_AP, Predicted=pred_bay_AP$class)
+
+#Confusion matrix of Naïve-Bayesian classification.
+
+CF_NB_AP
+
+NB_TP_AP <- CF_NB_AP[2,2]
+NB_TN_AP <- CF_NB_AP[1,1]
+NB_FP_AP <- CF_NB_AP[1,2]
+NB_FN_AP <- CF_NB_AP[2,1]
+
+NBAccuracy_AP <- (NB_TP_AP + NB_TN_AP) / 6332
+NBAccuracy_AP
+                       
+```
+TP = 2231, TN = 3156, FP = 440, FN = 505
+
+Accuracy of Naïve-Bayesian = TP + TN / Total = 0.8507
+
+Miss Classification Rate = FP + FN / Total = 0.1492
+
+Sensitivity = TP / (TP + FN) = 0.8352
+
+Specificity = TN / (TN + FP) = 0.8776
+
+Precision = TP / (TP + FP) = 0.8352
+
+Prevalance = Actual '1' / Total = 0.4320
+
+```{r}
+print(paste("the time (in seconds) it took to fit the Naïve-Bayesian:", NB_Time_AP))
+```
+
+             
+
+
+-----------------------------------------------------------------------------
+                      
+Q3.
+    Linear Discriminant Analysis
+1. Use all the variables in the dataset to fit an LDA classification model.
+2. Summarize the results in a Confusion Matrix.
+3. As demonstrated in class, calculate the time (in seconds) it took to fit the 
+   model and include this in your summary.
+
+
+#NOTE: I am calling this model as Model-C in further discussion and comparisons.
+
+```{r}
+
+LDAstart_time_AP <- Sys.time()
+  
+LDA.fit_AP <- lda(OT_AP ~ ., data = Assignment05_AP, na.action=na.omit)
+  
+LDAend_time_AP <- Sys.time()
+  
+LDA_Time_AP <- LDAend_time_AP - LDAstart_time_AP
+  
+LDA_Time_AP  
+
+#Predicting LDA Model
+
+LDApred_AP <- predict(LDA.fit_AP, data=Assignment05_AP)
+
+#Confusion matrix for LDA Model.
+
+CF_LDA_AP <- table(Actual=OT_AP, Predicted=LDApred_AP$class)
+
+CF_LDA_AP
+
+LDA_TP_AP <- CF_LDA_AP[2,2]
+LDA_TN_AP <- CF_LDA_AP[1,1]
+LDA_FP_AP <- CF_LDA_AP[1,2]
+LDA_FN_AP <- CF_LDA_AP[2,1]
+
+LDA_Accuracy_AP <- (LDA_TP_AP + LDA_TN_AP) / 6332
+LDA_Accuracy_AP
+
+```
+TP = 2266, TN = 3157, FP = 439, FN = 470
+
+Accuracy Of LDA = TP + TN / Total = 0.8564
+
+Miss Classification Rate = FP + FN / Total = 0.1435
+
+Sensitivity = TP / (TP + FN) = 0.8282
+
+Specificity = TN / (TN + FP) = 0.8779
+
+Precision = TP / (TP + FP) = 0.8377
+
+Prevalence = Actual '1' / Total = 0.4320
+
+```{r}
+print(paste("the time (in seconds) it took to fit LDA classification:", LDA_Time_AP ))
+```
+
+
+----------------------------------------------------------------------------
+
+Q4 Compare All Three Classifiers
+For all questions below please provide evidence.
+
+1. Which classifier is most accurate? (provide evidence)
+
+```{r}
+
+BackAccuracy_AP
+NBAccuracy_AP
+LDA_Accuracy_AP
+
+```
+
+
+Accuracy of Backward = TP + TN / Total = (3164 + 2268)/ 6332 = 0.8559
+Accuracy Of LDA = TP + TN / Total = 0.8564
+Accuracy of Naïve-Bayesian = TP + TN / Total = 0.8507
+
+Conclusion: Accuracy of Linear Discriminant Analysis has the highest.
+
+2. Which classifier is most suitable when processing speed is most important?
+
+```{r}
+
+Backglm_Time_AP
+NB_Time_AP
+LDA_Time_AP
+
+```
+LDA classification model should be considered when processing speed is most 
+important.
+
+NOTE: Here, my model time can be changed when I convert it in pdf and re run the
+code.
+
+3. Which classifier minimizes false positives?
+
+```{r}
+BackFP_AP
+NB_FP_AP
+LDA_FP_AP
+
+#Note: Here, I have built model on same dataset so I am not considering
+#division with total.
+```
+
+Logistic Regression – Backward has the fewest false positives among
+three models which is 432.
+
+4. Which classifier is best overall?
+
+```{r}
+#Accuracy
+BackAccuracy_AP
+NBAccuracy_AP
+LDA_Accuracy_AP
+
+#Fewest False Positive
+BackFP_AP
+NB_FP_AP
+LDA_FP_AP
+
+#Fewest False Negatives
+BackFN_AP
+NB_FN_AP
+LDA_FN_AP
+
+#Less time taken by
+Backglm_Time_AP
+NB_Time_AP
+LDA_Time_AP
+
+```
+LDA classification model has the highest Accuracy:0.8564
+Logistic Regression – Backward has Fewest False Positives : 432
+LDA classification model has fewest False Negatives: 470
+LDA classification model takes less time than other
+
+Conclusion: From Above factors we can say that LDA classification model
+            superior to others. However if only consider Fewest False Positives
+            than Logistic Regression – Backward is better.
+
+
+
+
+
+NOTE: Here, my model time can be changed when I convert it in pdf and re run the
+code.Therefore, time taken by model can be changes as there is minor difference
+between Naïve-Bayesian and LDA classification model.
+
+#Bonus
+
+Decision Tree
+
+1. Use all the variables in the dataset to fit a Decision Tree classification 
+   model. 
+   
+2. Summarize the results in a Confusion Matrix.
+
+3. As demonstrated in class, calculate the time (in seconds) it took to fit the 
+   model and include this in your summary.
+
+
+```{r fig.height=20, fig.width=18}
+
+tree_start_time_AP <- Sys.time()
+tree_AP <- ctree(OT_AP ~., data = Assignment05_AP)
+plot(tree_AP, gp=gpar (fontsize= 8))
+tree_end_time_AP <- Sys.time()
+tree_Time_AP <- tree_end_time_AP - tree_start_time_AP
+  
+tree_Time_AP 
+
+PredTree_AP <- predict(tree_AP, Assignment05_AP)
+
+CF_tree_AP <- table(Actual=OT_AP, Predicted=PredTree_AP)
+
+CF_tree_AP
+
+```
+
+
+Tree explanation:
+
+1.The value with highest value contains Mil_AP with <=1562, Car_AP with M-Press,
+Mil_AP <= 1258.
+
+2.The branch which has no positive value contains Mil_AP>2203, Vin_AP <=14,
+Mil_AP > 2013, Car_AP with M-press delivery, Mil_AP > 1809, Mil_AP >1562
+
+3. Node with less than 0.5 positive value
+   a. Cst_AP <+9, Mil_AP <=1466, Mil_AP > 1279, Car_AP with Fed Post, 
+      Mil_AP <= 1562
+      
+   b. Haz_AP with H, Cst_AP > 9, Mil_AP <+ 1466, Mil_AP > 1279, Car_AP with Fed
+      Post, Mil_AP <= 1562.
+      
+   c. Mil_AP > 1466, Mil_AP > 1279, Car_AP with Fed Post, Mil_AP <= m1562.
+   
+
+4. Node with value 0.9 contains Vin_AP <= 16, Haz_AP with H, Mil_AP <= 1015,
+   Mil_AP <= 1279, Car_AP with Fed Post, Mil_AP <= 1562.
+
+
+TP =2232, TN = 3193, FP = 403, FN = 504
+
+Accuracy = TP + TN / Total = 0.8567
+
+Miss Classification Rate = FP + FN / Total = 0.1432
+
+Sensitivity = TP / (TP + FN) = 0.8157
+
+Specificity = TN / (TN + FP) = 0.8879
+
+Precision = TP / (TP + FP) = 0.8470
+
+Prevalence = Actual '1' / Total = 0.4320
+
+
+
+```{r}
+print(paste("the time (in seconds) it took to fit Decision Tree:", tree_Time_AP ))
+
+```
+
+NOTE: Here, my model time can be changed when I convert it in pdf and rerun the
+code.
+
+               
+
+ 
+
+
+
+
+
+
+
+References:
+
+
+David Marsh.(2022).[PROG8430-L10-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L11-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L12-22F].eConestoga.
+
+David Marsh.(2022).[R Documents].eConestoga.
+
+Exploratory Data Analysis with R
+Peng
+https://bookdown.org/rdpeng/exdata/exploratory-graphs.html
+
+
+

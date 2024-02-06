@@ -1,0 +1,459 @@
+---
+title: "Final Exam"
+author: "Ajay Kanubhai Patel"
+date: "2022-12-13"
+output:
+  word_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#Loading the package
+
+```{r}
+#Load packages to convert file in PDF.
+
+if(!require(tinytex)){install.packages("tinytex")}
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/FINAL EXAM')
+
+```
+
+This section is for the basic set up. It will clear all the plots, the
+console and the workspace. It also sets the overall format for numbers.
+
+```{r}
+if(!is.null(dev.list())) dev.off()
+cat("\014") 
+rm(list=ls())
+options(scipen=9)
+```
+
+#To read Excel file in R data frame.
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+
+```{r}
+if(!require(pastecs)){install.packages("pastecs")}
+library("pastecs")
+
+if(!require(lattice)){install.packages("lattice")}
+library("lattice")
+
+if(!require(vcd)){install.packages("vcd")}
+library("vcd")
+
+if(!require(HSAUR)){install.packages("HSAUR")}
+library("HSAUR")
+
+if(!require(rmarkdown)){install.packages("rmarkdown")}
+library("rmarkdown")
+
+
+if(!require(ggplot2)){install.packages("ggplot2")}
+library("ggplot2")
+
+if(!require(klaR)){install.packages("klaR")}
+library("klaR")
+
+if(!require(partykit)){install.packages("partykit")}
+library("partykit")
+
+```
+# To get working directory
+# To read PROG8430_Assign04_22F.txt file located at 
+# "D:/Final Assignment/DATA/Assignment5"
+
+```{r}
+
+getwd()  
+
+
+Train_AP <- read_excel("PROG8430_Final_22F_train.xlsx")
+
+head(Train_AP)
+
+str(Train_AP)
+
+```
+
+Rename all variables with your initials appended.
+  
+  # to change all column name by appending my initials (Ajay Patel = AP) and 
+    separate it by "_".
+
+
+```{r}
+
+colnames(Train_AP) <- paste(colnames(Train_AP), "AP", sep = "_") 
+head(Train_AP)
+
+str(Train_AP)
+
+```
+
+Convert Character variables into factor variables.
+
+```{r}
+Train_AP$Cancer_AP <- as.factor(Train_AP$Cancer_AP)
+Train_AP$Hst_AP <- as.factor(Train_AP$Hst_AP)
+Train_AP$Smk_AP <- as.factor(Train_AP$Smk_AP)
+Train_AP$Drk_AP <- as.factor(Train_AP$Drk_AP)
+Train_AP$Hlth_AP <- as.factor(Train_AP$Hlth_AP)
+
+str(Train_AP)
+
+
+```
+Dimension reduction process.
+
+let's check missing factor variables.
+
+
+
+```{r}
+
+summary(Train_AP)
+#there is no missing values in all the variables.
+stat.desc(Train_AP)
+#There is no low variance after inspection of Coef.var of all variables
+#(for numeric).
+
+
+
+
+```
+
+Apply the High Correlation Filter to remove appropriate columns of data.
+
+High correlation between two variables means they have similar trends and are 
+likely to carry similar information.
+
+No correlation available between numerical and nominal columns.
+
+pearson, spearman,kendall methos can be used to measure the degree of 
+association between two variables.
+
+can only check for numerical and we have 3 column with numeric data so
+n(n-1)/2 (3*2/2 = 3) combination should be checked. 
+
+```{r}
+
+#by spearman method
+#Speaman is non-parametric and therefore makes no normalacy assumption
+
+cor(Train_AP$Age_AP,Train_AP$HW_AP,method = "spearman")
+cor(Train_AP$Age_AP,Train_AP$Exe_AP,method = "spearman")
+cor(Train_AP$HW_AP,Train_AP$Exe_AP,method = "spearman")
+
+```
+
+Conclusion: There is no correlation between numeric variables.
+Moreover, 4 variables are binary so we cannot plot
+
+There no single variable which is not useful in analytic purpose.
+
+
+Let's check for the outliers.
+
+```{r}
+boxplot(Train_AP$Age_AP,
+       main="Box Plot of Age in years",
+        xlab="Years",
+        col=1, horizontal=TRUE, pch=20, range = 0.5)
+
+densityplot( ~ Train_AP$Age_AP, pch=2)
+
+
+boxplot(Train_AP$HW_AP,
+       main="Box Plot of A ratio of Height to Weight",
+        xlab="DAYS",
+        col=2, horizontal=TRUE, pch=20, range = 0.5)
+densityplot( ~ Train_AP$HW_AP, pch=3)
+
+boxplot(Train_AP$Exe_AP,
+       main="Box Plot of Time spent exercising each week",
+        xlab="Exercise in minutes",
+        col=3, horizontal=TRUE, pch=20, range = 0.5)
+densityplot( ~ Train_AP$Exe_AP, pch=4)
+
+densityplot( ~ Train_AP$HW_AP, pch=6)
+nr <- which(Train_AP$HW_AP == max(Train_AP$HW_AP))#to see which row has max value
+nr
+
+
+
+```
+
+From Density plot and boxplot we can say all the variables are seem fine.
+However, HW_AP has outlier which has value 8.5 but I am keep this variables
+as it is at this moment because it is possible that that person has 
+height or weight more compared to each other so ratio is high.
+
+#let's create glm model as our dependent variable is in binary so here
+we will apply logistic regression.
+
+```{r warning=FALSE}
+
+glmstart_time_AP <- Sys.time()
+glm_AP <- glm(Train_AP$Cancer_AP ~ ., data=Train_AP, family = "binomial")
+summary(glm_AP)
+glmend_time_AP <- Sys.time()
+glm_Time_AP <- glmend_time_AP - glmstart_time_AP
+
+str(Train_AP)
+#just experimenting
+#glm1_AP <- glm(Train_AP$Cancer_AP ~ Age_AP + HW_AP + Hst_AP + 
+#   Smk_AP+Drk_AP, data=Train_AP, family = "binomial")
+#summary(glm1_AP)
+#---------
+resp_glm_AP <- predict(glm_AP, type="response")   
+  Class_glm_AP <- ifelse(resp_glm_AP > 0.5,"1","0")           
+  CF_GLM_AP <- table(Train_AP$Cancer_AP, Class_glm_AP,
+                dnn=list("Act ","Predicted") ) 
+  CF_GLM_AP
+  
+glmTP_AP <- CF_GLM_AP[2,2]
+glmTN_AP <- CF_GLM_AP[1,1]
+glmFP_AP <- CF_GLM_AP[1,2]
+glmFN_AP <- CF_GLM_AP[2,1]
+
+GLMAccuracy_AP <- (glmTP_AP + glmTN_AP) / 695
+GLMAccuracy_AP
+
+
+```
+
+
+
+
+
+
+
+```{r warning=FALSE}
+#let's see by applying backward
+
+backstart_time_AP <- Sys.time()
+glm_AP <- glm(Train_AP$Cancer_AP ~ ., data=Train_AP, family = "binomial")
+Backstep.fit_AP <- step(glm_AP, direction = "backward",trace = 0)
+backend_time_AP <- Sys.time()
+back_Time_AP <- backend_time_AP - backstart_time_AP
+summary(Backstep.fit_AP)
+
+#confusion matrix for backward
+
+resp_glm_AP <- predict(Backstep.fit_AP, type="response")   
+  Class_glm_AP <- ifelse(resp_glm_AP > 0.5,"1","0")           
+  CF_bGLM_AP <- table(Train_AP$Cancer_AP, Class_glm_AP,
+                dnn=list("Act ","Predicted") ) 
+  CF_bGLM_AP
+  
+BackTP_AP <- CF_bGLM_AP[2,2]
+BackTN_AP <- CF_bGLM_AP[1,1]
+BackFP_AP <- CF_bGLM_AP[1,2]
+BackFN_AP <- CF_bGLM_AP[2,1]
+
+BackAccuracy_AP <- (BackTP_AP + BackTN_AP) / 695
+BackAccuracy_AP
+back_Time_AP
+
+
+```
+Conclusion: I am selecting backward model as a the best model because it has
+low AIC all the variables are significant, residuals are symmetrical. However,
+there is slightly high differnece between NUll and residuals deviance compared
+to normal glm model but from other factors backward model is the best.
+
+
+Naïve-Bayes Classification         
+            
+
+
+```{r warning=FALSE}
+
+NBstart_time_AP <- Sys.time()
+  
+NB.fit_AP <- NaiveBayes(Train_AP$Cancer_AP ~ . ,data = Train_AP, na.action=na.omit)
+  
+NBend_time_AP <- Sys.time()
+  
+NB_Time_AP <- NBend_time_AP - NBstart_time_AP
+
+NB_Time_AP
+  
+pred_bay_AP <- predict(NB.fit_AP,Train_AP)
+ 
+#Creates Confusion Matrix
+
+CF_NB_AP <- table(Actual=Train_AP$Cancer_AP, Predicted=pred_bay_AP$class)
+
+#Confusion matrix of Naïve-Bayesian classification.
+
+CF_NB_AP
+
+NB_TP_AP <- CF_NB_AP[2,2]
+NB_TN_AP <- CF_NB_AP[1,1]
+NB_FP_AP <- CF_NB_AP[1,2]
+NB_FN_AP <- CF_NB_AP[2,1]
+
+NBAccuracy_AP <- (NB_TP_AP + NB_TN_AP) / 695
+NBAccuracy_AP
+
+```
+
+
+            
+ Linear Discriminant Analysis
+
+```{r}
+
+LDAstart_time_AP <- Sys.time()
+  
+LDA.fit_AP <- lda(Train_AP$Cancer_AP ~ ., data = Train_AP, na.action=na.omit)
+
+LDAend_time_AP <- Sys.time()
+  
+LDA_Time_AP <- LDAend_time_AP - LDAstart_time_AP
+  
+LDA_Time_AP  
+
+#Predicting LDA Model
+
+LDApred_AP <- predict(LDA.fit_AP, data=Train_AP)
+
+#Confusion matrix for LDA Model.
+
+CF_LDA_AP <- table(Actual=Train_AP$Cancer_AP, Predicted=LDApred_AP$class)
+
+CF_LDA_AP
+
+LDA_TP_AP <- CF_LDA_AP[2,2]
+LDA_TN_AP <- CF_LDA_AP[1,1]
+LDA_FP_AP <- CF_LDA_AP[1,2]
+LDA_FN_AP <- CF_LDA_AP[2,1]
+
+LDA_Accuracy_AP <- (LDA_TP_AP + LDA_TN_AP) / 695
+LDA_Accuracy_AP
+
+
+```
+Conclusion: here we can see the backward model has the lowest false positives,
+false negatives, and high accuracy. However, model processing time is high
+compared to others but I am choosing backward model as the best model.
+
+
+For Test data
+
+```{r}
+Test_AP <- read_excel("PROG8430_Final_22F_test.xlsx")
+
+head(Test_AP)
+
+str(Test_AP)
+
+#initials
+
+colnames(Test_AP) <- paste(colnames(Test_AP), "AP", sep = "_") 
+head(Test_AP)
+
+str(Test_AP)
+
+# converting characters into the factors
+
+Test_AP$Hst_AP <- as.factor(Test_AP$Hst_AP)
+Test_AP$Smk_AP <- as.factor(Test_AP$Smk_AP)
+Test_AP$Drk_AP <- as.factor(Test_AP$Drk_AP)
+Test_AP$Hlth_AP <- as.factor(Test_AP$Hlth_AP)
+
+str(Test_AP)
+
+```
+
+```{r}
+summary(Test_AP)
+#there is no missing values in all the variables.
+stat.desc(Test_AP)
+#There is no low variance after inspection of Coef.var of all variables
+#(for numeric).
+#by spearman method
+#Speaman is non-parametric and therefore makes no normalacy assumption
+
+cor(Train_AP$Age_AP,Train_AP$HW_AP,method = "spearman")
+cor(Train_AP$Age_AP,Train_AP$Exe_AP,method = "spearman")
+cor(Train_AP$HW_AP,Train_AP$Exe_AP,method = "spearman")
+
+#There is no correlation between numeric variables
+```
+
+```{r}
+boxplot(Test_AP$Age_AP,
+       main="Box Plot of Age in years",
+        xlab="Years",
+        col=1, horizontal=TRUE, pch=20, range = 0.5)
+
+densityplot( ~ Test_AP$Age_AP, pch=2)
+
+
+boxplot(Test_AP$HW_AP,
+       main="Box Plot of A ratio of Height to Weight",
+        xlab="DAYS",
+        col=2, horizontal=TRUE, pch=20, range = 0.5)
+densityplot( ~ Test_AP$HW_AP, pch=3)
+
+boxplot(Test_AP$Exe_AP,
+       main="Box Plot of Time spent exercising each week",
+        xlab="Exercise in minutes",
+        col=3, horizontal=TRUE, pch=20, range = 0.5)
+densityplot( ~ Test_AP$Exe_AP, pch=4)
+
+```
+From above graphs, All variables seem reasonable. 
+               
+```{r}
+
+if(!require(writexl)){install.packages("writexl")}
+library("writexl")
+
+pred_AP <- predict(Backstep.fit_AP, newdata=Test_AP)
+head(pred_AP)
+
+test_fin_AP <- cbind(Test_AP,pred_AP)
+
+write_xlsx(test_fin_AP,"PROG8430_22F_Final_Pred_AP.xlsx")
+
+
+```
+
+
+
+
+
+
+
+References:
+
+
+David Marsh.(2022).[PROG8430-L10-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L11-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L12-22F].eConestoga.
+
+David Marsh.(2022).[R Documents].eConestoga.
+
+
+
+
+

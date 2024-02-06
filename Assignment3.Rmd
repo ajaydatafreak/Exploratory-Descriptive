@@ -1,0 +1,595 @@
+---
+title: "Assignment_3"
+author: "Ajay Kanubhai Patel"
+date: "2022-10-21"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+#Loading the package
+
+
+```{r}
+#Load packages to convert file in PDF.
+
+if(!require(tinytex)){install.packages("tinytex")}
+
+```
+
+#This sets the working directory
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/Assignment3')
+
+```
+
+This section is for the basic set up.
+It will clear all the plots, the console and the workspace.
+It also sets the overall format for numbers.
+
+```{r}
+if(!is.null(dev.list())) dev.off()
+cat("\014") 
+rm(list=ls())
+options(scipen=9)
+```
+#To read Excel file in R data frame.
+
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+#This sets the working directory
+
+```{r} 
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/Assignment3')
+
+```
+
+
+This section is for the basic set up.
+It will clear all the plots, the console and the workspace.
+It also sets the overall format for numbers.
+
+
+
+#To read Excel file in R data frame.
+
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+
+```{r}
+if(!require(pastecs)){install.packages("pastecs")}
+library("pastecs")
+
+if(!require(lattice)){install.packages("lattice")}
+library("lattice")
+
+if(!require(vcd)){install.packages("vcd")}
+library("vcd")
+
+if(!require(HSAUR)){install.packages("HSAUR")}
+library("HSAUR")
+
+if(!require(rmarkdown)){install.packages("rmarkdown")}
+library("rmarkdown")
+
+
+if(!require(ggplot2)){install.packages("ggplot2")}
+library("ggplot2")
+
+
+```
+
+
+```{r}
+
+getwd()  
+
+
+Assignment03_AP <- read_excel("PROG8430_Assign03_22F.xlsx")
+
+
+Assignment03_AP  <- as.data.frame(Assignment03_AP ) 
+
+```  
+  
+1. 
+
+Initial Transformation
+
+a. Rename all variables with your initials appended.
+  
+  # to change all column name by appending my initials (Ajay Patel = AP) and 
+    separate it by "_".
+  # head(data,n) displays 1st n rows present in our excel file. 
+    head(Assignment03_BDSA,08)=   shows first 8 rows. If number is not
+    provided by default is shows 1st 6 rows
+
+```{r}
+
+colnames(Assignment03_AP) <- paste(colnames(Assignment03_AP), "AP", sep = "_") 
+
+
+head(Assignment03_AP)
+
+```
+b. Transform character variables to factor variables.
+
+  # first we analyze structure of our data and then perform required operation.
+  
+  
+```{r}
+str(Assignment03_AP)
+```
+
+# to transform chr variables into factor variables.
+# There are total 6 varibles in character form.
+
+
+```{r}
+
+Assignment03_AP$gender_AP <- as.factor(Assignment03_AP$gender_AP)
+Assignment03_AP$HR_AP <- as.factor(Assignment03_AP$HR_AP)
+Assignment03_AP$BP_AP <- as.factor(Assignment03_AP$BP_AP)
+Assignment03_AP$Smoke_AP <- as.factor(Assignment03_AP$Smoke_AP)
+Assignment03_AP$Drink_AP <- as.factor(Assignment03_AP$Drink_AP)
+Assignment03_AP$Group_AP <- as.factor(Assignment03_AP$Group_AP)
+str(Assignment03_AP)
+
+```
+Q1 (2). 
+
+Reduce Dimensionality
+
+a. Apply the Missing Value Filter to remove appropriate columns of data.
+
+# To identify missing values we apply summary()func and observe NA's for 
+#each column.
+
+#There are 492 records (almost 98.4%) in Income_AP which are NA(Not Available).
+
+#To drop Income_AP column Assignment03_AP[-c(13)].
+  
+
+```{r}
+summary(Assignment03_AP)
+
+Assignment03_AP <- Assignment03_AP[-c(13)]
+
+head(Assignment03_AP) 
+
+
+```
+
+
+b. Apply the Low Variance Filter to remove appropriate columns of data.
+
+#only for numerical columns.
+
+```{r}
+stat.desc(Assignment03_AP) #Consider coef of var for the low variance,
+summary(Assignment03_AP)
+
+# we can observe that  Hgt_AP has low variance.
+
+table(Assignment03_AP$Hgt_AP) # It displays how many records has same value
+# For example, 9 records has 67.1 value in Hgt_AP column.
+
+Assignment03_AP <- Assignment03_AP[-c(8)] #removes Hgt_AP column.
+
+head(Assignment03_AP) 
+
+
+
+```
+
+
+c. Apply the High Correlation Filter to remove appropriate columns of data.
+
+#High correlation between two variables means they have similar trends and are 
+#likely to carry similar information.
+
+#No correlation available between numerical and nominal columns.
+
+#pearson, spearman,kendall methos can be used to measure the degree of 
+#association between two variables.
+
+# can only check for numerical and we have 4 column with numeric data so
+#n(n-1)/2 (4*3/2 = 6) combination should be checked.
+
+# I have checked by three methods just for knowledge.
+
+```{r}
+
+#by spearman method
+#Speaman is non-parametric and therefore makes no normalacy assumption
+
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Wgt2_AP,method = "spearman") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Exercise_AP,method = "spearman") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$WBC_AP,method = "spearman")
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$Exercise_AP,method = "spearman") 
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$WBC_AP,method = "spearman") 
+cor(Assignment03_AP$Exercise_AP,Assignment03_AP$WBC_AP,method = "spearman")
+
+#by pearson method
+#assumes normalacy
+
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Wgt2_AP,method = "pearson") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Exercise_AP,method = "pearson") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$WBC_AP,method = "pearson")
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$Exercise_AP,method = "pearson") 
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$WBC_AP,method = "pearson") 
+cor(Assignment03_AP$Exercise_AP,Assignment03_AP$WBC_AP,method = "pearson")
+
+# by kendall method
+#Kendall rank correlation (non-parametric) is an alternative to Pearson's 
+#correlation (parametric)
+
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Wgt2_AP,method = "kendall") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Exercise_AP,method = "kendall") 
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$WBC_AP,method = "kendall")
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$Exercise_AP,method = "kendall") 
+cor(Assignment03_AP$Wgt2_AP,Assignment03_AP$WBC_AP,method = "kendall") 
+cor(Assignment03_AP$Exercise_AP,Assignment03_AP$WBC_AP,method = "kendall")
+
+
+```
+#Wgt1_AP and Wgt2_AP are highly correlated to each other so going to drop
+# Wgt2_AP column
+
+```{r}
+
+Assignment03_AP <- Assignment03_AP[-c(6)]
+head(Assignment03_AP)
+
+```
+
+
+d. Drop any variables that do not contribute any useful analytical information 
+at all.
+
+Answer: Here, I am going to drop gender_AP columns as it contains only Females
+so it is not quite useful for analytic purpose.
+
+```{r}
+
+Assignment03_AP <- Assignment03_AP[-c(2)]
+head(Assignment03_AP)
+
+```
+
+Q1 (3). 
+
+Outliers
+
+a. Create boxplots of all relevant variables (i.e. numeric, non-binary) 
+to determine outliers.
+
+```{r}
+
+str(Assignment03_AP)
+boxplot(Assignment03_AP$Wgt1_AP,
+       main="Box Plot of Patient Weight 1 week before test start",
+        xlab="Weight",
+        col="blue", horizontal=TRUE, pch=20)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment03_AP$Wgt1_AP,
+       main="Box Plot of Patient Weight 1 week before test start",
+        xlab="Weight",
+        col="blue", horizontal=TRUE, pch=20, range = 0.5)
+
+
+boxplot(Assignment03_AP$Exercise_AP, 
+        main="Box Plot of Minutes per week patient exercises",
+        xlab="Minutes Per Week",
+        col="red", horizontal=TRUE, pch=21)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment03_AP$Exercise_AP, 
+        main="Box Plot of Minutes per week patient exercises",
+        xlab="Minutes Per Week",
+        col="red", horizontal=TRUE, pch=21, range = 1)
+
+boxplot(Assignment03_AP$WBC_AP, 
+        main="Box Plot of WBC (White Blood Cell)",
+        xlab="White Blood Cell Count",
+        col="brown",horizontal=TRUE, pch=22)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment03_AP$WBC_AP, 
+        main="Box Plot of WBC (White Blood Cell)",
+        xlab="White Blood Cell Count",
+        col="brown",horizontal=TRUE, pch=22, range = 1)
+
+
+
+densityplot( ~ Assignment03_AP$Wgt1_AP, pch=6)
+densityplot( ~ Assignment03_AP$Exercise_AP, pch=8)
+densityplot( ~ Assignment03_AP$WBC_AP, pch=8)
+
+
+
+```
+
+# For factor variables.(for non-binary variables only)
+ 
+
+```{r}
+
+
+Assignment03_AP$HR_AP <- as.factor(Assignment03_AP$HR_AP)
+Assignment03_AP$BP_AP <- as.factor(Assignment03_AP$BP_AP)
+
+
+barplot(table(Assignment03_AP$HR_AP), cex.names=0.5, main="Barplot of HR_AP", 
+        col = 1)
+barplot(table(Assignment03_AP$BP_AP), cex.names=0.5, main="Barplot of BP_AP", 
+        col = 2)
+
+
+
+
+
+```
+
+
+
+b. Comment on any outliers you see and deal with them appropriately.
+
+Conclusion:1. wgt1_AP looks good.
+           2. Exercise_AP looks good.
+           3. WBC_AP has one outlier.
+              low HR_AP and low BP_AP categories as comparatively small values
+              than that of normal category still they are useful.
+
+#To remove a outlier of WBC_AP at its max value.
+
+```{r}
+
+densityplot( ~ Assignment03_AP$WBC_AP, pch=10)
+nr <- which(Assignment03_AP$WBC_AP == max(Assignment03_AP$WBC_AP))  
+#above code is to detect Row number with max value 
+Assignment03_AP <- Assignment03_AP[-c(nr),]
+densityplot( ~ Assignment03_AP$WBC_AP, pch=21)
+
+```
+
+Q2.
+
+Organizing Data
+
+1. Scatter Plots
+
+  a. Create a histogram for one of the Weight variables.
+  
+```{r}
+
+hist(Assignment03_AP$Wgt1_AP,
+     main = "Histogram Of Patient Weight 1 week before test start",
+     xlab = "Weight Of Patient",
+     xlim = c(45,250),
+     ylim = c(0,200),
+     col = 4, border = "black")
+```
+  
+  
+  
+  b. Create a histogram for Exercise.
+  
+```{r}
+
+hist(Assignment03_AP$Exercise_AP,
+     main = "Histogram Of Minutes per week patient exercises",
+     xlab = "Minutes Per Week",
+     xlim = c(60,350),
+     ylim = c(0,120),
+     col = 7, border="red")
+
+```
+  
+  c. Create a scatter plot showing the relationship between Exercise and Weight.
+     (note: Exercise should be on the x-axis, Weight should be the y-axis)
+     
+     
+```{r}
+
+plot(Assignment03_AP$Wgt1_AP~Assignment03_AP$Exercise_AP,
+     main = "Exercise Vs Weight",
+     xlab = "Minutes per week patient exercise",
+     ylab =  "Weight Of Patient",
+     xlim = c(60,350), 
+     ylim = c(45,250),
+     col = 2)
+```
+     
+  d. What conclusions, if any, can you draw from the chart?
+     From the above chart (scatter plot), we can see that there is not any 
+     linear relation between these two variables.
+  
+--------------------------------------------------------------------------------  
+  
+  e. Calculate a correlation coefficient between these two variables
+     (Wgt1_AP & Exercise_AP)
+     What conclusion you draw from it?
+     
+```{r}
+
+ggplot(data = Assignment03_AP, aes(x = Exercise_AP, 
+                                   y = Wgt1_AP, 
+                                   color = 7)) +
+ geom_point()+ labs(y = "Weight Of Patient",
+x = "Minutes per week patient exercise")
+
+xyplot(Wgt1_AP~Exercise_AP, data=Assignment03_AP, main="Exercise  vs Weight", 
+       colors=TRUE)
+
+cor(Assignment03_AP$Wgt1_AP,Assignment03_AP$Exercise_AP)
+cor.test(Assignment03_AP$Wgt1_AP,Assignment03_AP$Exercise_AP,
+         method="spearman")
+```
+
+
+ Conclusion: There is no linear relationship as our 0.00 ≤ |𝑟| < 0.25.
+ 
+--------------------------------------------------------------------------------
+ 
+Q3 Inference
+
+1. Normality
+
+  a. Create a QQ Normal plot of White Blood Cell counts.
+
+```{r}
+
+qqnorm(Assignment03_AP$WBC_AP, pch=4, frame=TRUE)
+qqline(Assignment03_AP$WBC_AP, col=4, lwd=4)
+
+```
+
+  b. Conduct a statistical test for normality on White Blood Cell counts.
+  
+```{r}
+
+shapiro.test(Assignment03_AP$WBC_AP) #Shapiro-Wilk Normality Test
+
+
+```
+  
+c. Is White Blood Cell count normally distributed? What led you to this 
+   conclusion?
+   
+   Yes, White Blood Cell Count is normally distributed. 
+   
+   1.as p-value = 0.6 which is GREATER THAN 0.05 (P>0.05) that 
+     means we cannot reject Null hypothesis which state that variable is 
+     normally distributed.
+     
+   2.From QQ Normal Plot and qq line all the points are on and close to line
+     which indicates normality of variable.(from Q3 a)
+     
+   
+-------------------------------------------------------------------------------     
+     
+Statistically Significant Differences
+
+a. Compare White Blood Cell counts between the treatment and control group 
+   using a suitable hypothesis test.
+   
+```{r}
+
+# to perform F test to see whether variance are equal or not.
+
+Ftest_AP <- var.test(WBC_AP~Group_AP, data = Assignment03_AP)
+Ftest_AP
+
+# from F-test p > 0.05 that means no significant difference in variances or
+# variance of variables are almost same.
+
+# I have described reasons behind choosing this test below.
+
+Ttest_AP <- t.test(WBC_AP~Group_AP, data = Assignment03_AP, var.equal=TRUE)
+Ttest_AP
+
+
+```
+   
+   
+b. Explain why you chose the test you did.
+
+   a. Data is Independent
+   b. Data is normally distributed (From Shapiro-Wilks Test)
+   c. Variance is unknown, but equal (From F-Test)
+   
+   A t-test is a statistical test that is used to compare the means of two 
+   groups. It is often used in hypothesis testing to determine whether 
+   a process or treatment actually has an effect on the population of 
+   interest, or whether two groups are different from one another.
+   
+   Reference:Bevans, R. (2022, July 9). An introduction to t-tests. 
+             Scribbr. Retrieved October 20, 2022, from 
+             #https://www.scribbr.com/statistics/t-test/
+   
+--------------------------------------------------------------------------------   
+   
+c. Do you have strong evidence that White Blood Cell counts are different 
+   between the treatment and control groups?
+   
+   Yes, From the T-Test, I can say that White Blood Cell Counts are different 
+   between the treatment and control groups as p-value is less than 0.05 which 
+   provide evidence against Null Hypothesis.
+   
+   
+--------------------------------------------------------------------------------
+
+
+3. Multiple Statistical Differences
+
+  a. Determine if White Blood Cell count varies by Heart Rate Level using ANOVA
+     (statistical) and a sequence of boxplots (graphical).
+     
+```{r}
+
+summary(aov(WBC_AP~HR_AP, data = Assignment03_AP))
+
+boxplot(WBC_AP~HR_AP, data = Assignment03_AP,
+        main = "Heart Rate VS White Blood Cell",
+        ylab = "Heart Rate",
+        xlab = "White Blood Cell", horizontal = TRUE,
+        range = 1)
+
+
+```
+
+Conclusion: No,  White Blood Cell count do not vary by Heart Rate Level as
+            p-value is greater than 0.05 so mean of all the groups is almost
+            same.
+
+
+
+  b. Determine if White Blood Cell count varies by Blood Pressure Level using 
+     ANOVA and a sequence of boxplots.
+     
+```{r}
+summary(aov(WBC_AP~BP_AP, data = Assignment03_AP))
+
+boxplot(WBC_AP~BP_AP, data = Assignment03_AP,
+        main = "White Blood Cell vs Blood Pressure",
+        ylab = "Blood Pressure",
+        xlab = "White Blood Cell", horizontal = TRUE,
+        range = 1)
+```
+
+
+Conclusion: No, White Blood Cell count do not vary by Blood Pressure Level as 
+             we can see p-value derived from ANOVA Test is greater than 0.05 
+             which indicates that means of all BP categories are probably same.
+             Moreover, Boxplot also indicates same result.
+   
+   
+   
+   
+ 
+ 
+ 
+
+
+
+
+

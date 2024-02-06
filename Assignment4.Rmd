@@ -1,0 +1,1032 @@
+---
+title: "Assignment_4"
+author: "Ajay Kanubhai Patel"
+date: "2022-11-18"
+output:
+  word_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#Loading the package
+
+```{r}
+#Load packages to convert file in PDF.
+
+if(!require(tinytex)){install.packages("tinytex")}
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/Assignment3')
+
+```
+
+This section is for the basic set up. It will clear all the plots, the
+console and the workspace. It also sets the overall format for numbers.
+
+```{r}
+if(!is.null(dev.list())) dev.off()
+cat("\014") 
+rm(list=ls())
+options(scipen=9)
+```
+
+#To read Excel file in R data frame.
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+#This sets the working directory
+
+```{r}
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Final Assignment/DATA/Assignment4')
+
+```
+
+This section is for the basic set up. It will clear all the plots, the
+console and the workspace. It also sets the overall format for numbers.
+
+#To read Excel file in R data frame.
+
+```{r}
+
+if(!require(readxl)){install.packages("readxl")}
+library("readxl")
+```
+
+```{r}
+if(!require(pastecs)){install.packages("pastecs")}
+library("pastecs")
+
+if(!require(lattice)){install.packages("lattice")}
+library("lattice")
+
+if(!require(vcd)){install.packages("vcd")}
+library("vcd")
+
+if(!require(HSAUR)){install.packages("HSAUR")}
+library("HSAUR")
+
+if(!require(rmarkdown)){install.packages("rmarkdown")}
+library("rmarkdown")
+
+
+if(!require(ggplot2)){install.packages("ggplot2")}
+library("ggplot2")
+
+
+```
+# To get working directory
+# To read PROG8430_Assign04_22F.txt file located at 
+# "D:/Final Assignment/DATA/Assignment4"
+
+```{r}
+
+getwd()  
+
+
+Assignment04_AP <- read.table(file = "D:/Final Assignment/DATA/Assignment4/PROG8430_Assign04_22F.txt", header = TRUE, sep = ",")
+
+head(Assignment04_AP)
+
+str(Assignment04_AP)
+
+```
+
+
+
+1. Preliminary and Exploratory
+
+  1(1) Rename all variables with your initials appended.
+  
+  # My name is Ajay Patel so I have appended all column name
+  #with _AP
+
+```{r}
+
+colnames(Assignment04_AP) <- paste(colnames(Assignment04_AP), "AP", sep = "_") 
+
+
+head(Assignment04_AP)
+
+
+```
+1(2) Examine the data using the exploratory techniques we have learned in class. 
+     Does the data look reasonable? Are there any outliers? If so, deal with 
+     them appropriately.
+
+     Converting Character variables into factor variables.
+     There are Three columns with character values.
+
+```{r}
+
+Assignment04_AP$Dom_AP <- as.factor(Assignment04_AP$Dom_AP)
+Assignment04_AP$Haz_AP <- as.factor(Assignment04_AP$Haz_AP)
+Assignment04_AP$Car_AP <- as.factor(Assignment04_AP$Car_AP)
+
+#Let's confirm
+str(Assignment04_AP)
+
+```
+
+```{r}
+
+# Let's see is there any NA by applying Missing value Filter for given data.
+summary(Assignment04_AP)
+# Conclusion: There is no Missing values.
+
+# Low variance Filter
+stat.desc(Assignment04_AP)
+
+```
+
+# High correlation filter
+
+#High correlation between two variables means they have similar trends
+#and are #likely to carry similar information.
+
+#No correlation available between numerical and nominal columns.
+
+#pearson, spearman,kendall methos can be used to measure the degree of
+#association between two variables.
+
+# can only check for numerical and we have 5 column with numeric data so
+
+#n(n-1)/2 (5*4/2 = 10) combination should be checked.
+
+# I have checked by three methods just for knowledge.
+
+Conclusion : There is no strong correlation exists between two variables.
+
+```{r}
+
+# By Spearman Method
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Vin_AP,method = "spearman") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Pkg_AP,method = "spearman") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Cst_AP,method = "spearman") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Mil_AP,method = "spearman") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Pkg_AP,method = "spearman") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Cst_AP,method = "spearman") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Mil_AP,method = "spearman") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Cst_AP,method = "spearman") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Mil_AP,method = "spearman") 
+cor(Assignment04_AP$Cst_AP,Assignment04_AP$Mil_AP,method = "spearman") 
+
+#by pearson method
+#assumes normalacy
+
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Vin_AP,method = "pearson") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Pkg_AP,method = "pearson") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Cst_AP,method = "pearson") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Mil_AP,method = "pearson") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Pkg_AP,method = "pearson") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Cst_AP,method = "pearson") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Mil_AP,method = "pearson") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Cst_AP,method = "pearson") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Mil_AP,method = "pearson") 
+cor(Assignment04_AP$Cst_AP,Assignment04_AP$Mil_AP,method = "pearson")
+
+# by kendall method
+#Kendall rank correlation (non-parametric) is an alternative to Pearson's 
+#correlation (parametric)
+
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Vin_AP,method = "kendall") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Pkg_AP,method = "kendall") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Cst_AP,method = "kendall") 
+cor(Assignment04_AP$Del_AP,Assignment04_AP$Mil_AP,method = "kendall") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Pkg_AP,method = "kendall") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Cst_AP,method = "kendall") 
+cor(Assignment04_AP$Vin_AP,Assignment04_AP$Mil_AP,method = "kendall") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Cst_AP,method = "kendall") 
+cor(Assignment04_AP$Pkg_AP,Assignment04_AP$Mil_AP,method = "kendall") 
+cor(Assignment04_AP$Cst_AP,Assignment04_AP$Mil_AP,method = "kendall")
+
+```
+   
+   Let's check Is there any column  which do not contribute any useful            
+   analytical information at all.
+   
+   all variables seems useful to derive analytical information. 
+
+```{r}
+
+head(Assignment04_AP)
+
+```
+
+Are there any outliers?
+
+To Find out outliers we are going to create Boxplots for all numeric and
+barplot for non-binary variables.
+
+
+```{r}
+
+#FOR TIME FOR DELIVERY
+boxplot(Assignment04_AP$Del_AP,
+       main="Box Plot of Time For Delivery In Days",
+        xlab="DAYS",
+        col="blue", horizontal=TRUE, pch=20)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment04_AP$Del_AP,
+       main="Box Plot of Time For Delivery In Days",
+        xlab="DAYS",
+        col="blue", horizontal=TRUE, pch=20, range = 0.5)
+
+
+densityplot( ~ Assignment04_AP$Del_AP, pch=1)
+
+# FOR VINTAGE OF PRODUCT
+
+boxplot(Assignment04_AP$Vin_AP,
+       main="Box Plot of VINTAGE OF PRODUCT",
+        xlab="how long it has been in the warehouse",
+        col="red", horizontal=TRUE, pch=21)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment04_AP$Vin_AP,
+       main="Box Plot of VINTAGE OF PRODUCT",
+        xlab="how long it has been in the warehouse",
+        col="red", horizontal=TRUE, pch=21, range = 0.5)
+
+
+densityplot( ~ Assignment04_AP$Vin_AP, pch=2)
+
+boxplot.stats(Assignment04_AP$Vin_AP)
+
+# FOR Pkg
+
+boxplot(Assignment04_AP$Pkg_AP,
+       main="Box Plot of  Pkg",
+        xlab="packages of product have been ordered",
+        col="brown",horizontal=TRUE, pch=22)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment04_AP$Pkg_AP,
+       main="Box Plot of Pkg",
+        xlab="packages of product have been ordered",
+        col="brown",horizontal=TRUE, pch=22, range = 0.5)
+
+densityplot( ~ Assignment04_AP$Pkg_AP, pch=3)
+
+# FOR Cst
+
+boxplot(Assignment04_AP$Cst_AP,
+       main="Box Plot of Cst",
+        xlab="orders the customer has made in the past",
+        col=1,horizontal=TRUE, pch=23)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment04_AP$Cst_AP,
+       main="Box Plot of Cst",
+        xlab="orders the customer has made in the past",
+        col=1,horizontal=TRUE, pch=23, range = 0.5)
+
+densityplot( ~ Assignment04_AP$Cst_AP, pch=4)
+
+# FOR Mil_AP
+
+boxplot(Assignment04_AP$Mil_AP,
+       main="Box Plot of Mil_AP",
+        xlab="Distance the order needs to be delivered in km",
+        col=2,horizontal=TRUE, pch=24)
+
+# let's shrink the graph and observe
+
+boxplot(Assignment04_AP$Mil_AP,
+       main="Box Plot of Mil_AP",
+        xlab="Distance the order needs to be delivered in km",
+        col=2,horizontal=TRUE, pch=24, range = 0.5)
+
+densityplot( ~ Assignment04_AP$Mil_AP, pch=5)
+
+```
+
+Let's try IQR method where we find using Q1-(1.5*IQR) 
+AND Q3+(1.5*IQR)
+
+Reference: 8 methods to find outliers in R (with examples)
+Bedre
+https://www.reneshbedre.com/blog/find-outliers.html
+
+
+```{r}
+#Outliers in Del_AP
+summary(Assignment04_AP$Del_AP)
+IQR(Assignment04_AP$Del_AP)
+delmin_AP <- 6.500-(1.5*2.2)
+delmax_AP <- 8.700+(1.5*2.2)
+Assignment04_AP$Del_AP[which(Assignment04_AP$Del_AP<delmin_AP|Assignment04_AP$Del_AP>delmax_AP)]#outliers with value
+
+#outliers in Vin_AP
+summary(Assignment04_AP$Vin_AP)
+IQR(Assignment04_AP$Vin_AP)
+vinmin_AP <- 10-(1.5*5)
+vinmax_AP <- 15+(1.5*5)
+Assignment04_AP$Vin_AP[which(Assignment04_AP$Vin_AP<vinmin_AP|Assignment04_AP$Vin_AP>vinmax_AP)]#outliers with value
+
+#outliers in Pkg_AP
+summary(Assignment04_AP$Pkg_AP)
+IQR(Assignment04_AP$Pkg_AP)
+pkgMin_AP <- 3-(1.5*2)
+pkgMax_Ap <- 5+(1.5*2)
+Assignment04_AP$Pkg_AP[which(Assignment04_AP$Pkg_AP<pkgMin_AP|Assignment04_AP$Pkg_AP>pkgMax_Ap)]#outliers with value
+
+#outliers in Cst_AP
+summary(Assignment04_AP$Cst_AP)
+IQR(Assignment04_AP$Cst_AP)
+cstMin_AP <- 7-(1.5*4)
+cstMax_Ap <- 11+(1.5*4)
+Assignment04_AP$Cst_AP[which(Assignment04_AP$Cst_AP<cstMin_AP|Assignment04_AP$Cst_AP>cstMax_Ap)]#outliers with value
+
+#outlirs in Mil_AP
+summary(Assignment04_AP$Mil_AP)
+IQR(Assignment04_AP$Mil_AP)
+milMin_AP <- 1336-(1.5*635.5)
+milMax_Ap <- 1972+(1.5*635.5)
+Assignment04_AP$Mil_AP[which(Assignment04_AP$Mil_AP<milMin_AP|Assignment04_AP$Mil_AP>milMax_Ap)]#outliers with value
+
+```
+
+
+
+There are three Binary factor variable so we cannot use barplot to detect 
+outliers.
+
+Dealing with outliers
+I am removing outlier in Vin_AP which is at -10 as time cannot be negative
+
+In other variables It is not rational decision to remove them so I am keeping
+them as they are.
+
+```{r}
+densityplot( ~ Assignment04_AP$Vin_AP, pch=6)
+nr <- which(Assignment04_AP$Vin_AP == min(Assignment04_AP$Vin_AP))  
+#Row number for min value as I want to remove outlier at minimum value 
+#which is -10.
+nr
+
+Assignment04_AP <- Assignment04_AP[-c(nr),]
+densityplot(  ~ Assignment04_AP$Vin_AP, pch=6)
+```
+
+
+
+
+
+
+1 (3). Using an appropriate technique from class, determine if there is any 
+   evidence if one Carrier has faster delivery times than the other. Make 
+   sure you explain the approach you took and your conclusions.
+
+
+```{r}
+boxplot(Del_AP~Car_AP, data = Assignment04_AP,horizontal = T, range=0.2)
+ftest_AP <- var.test(Del_AP~Car_AP, data=Assignment04_AP)
+ftest_AP
+shapiro.test(Assignment04_AP$Del_AP)
+qqnorm(Assignment04_AP$Del_AP)
+ttest_AP <- t.test(Del_AP~Car_AP, data=Assignment04_AP, var.equal= T)
+ttest_AP
+
+
+```
+Conclusion:
+1.From F_Test: p value > 0.05 so there is no significant different between two 
+             variance.
+2. From Shapiro-Wilk Normality (p value > 0.05) and QQ-Plot normally distributed
+          (all the points either close to line on on line).
+3. 1. data is independent.
+   2. data is normally distributed (Shapiro-Wilk Normality and QQ-Plot)
+   3. variance is unknown but equal (From F-Test)
+   so we can perform T-Test 
+   From T-Test: I can say that Delivery time for Fed Post is not
+    different than that of M-press as p-value is
+    greater than 0.05 so I would say both carrier are take same delivery time
+    in most of the cases.
+  
+
+
+1 (4). As demonstrated in class, split the dataframe into a training and a test 
+      file. This should be a 80/20 split. For the set.seed(), use the last four 
+      digits of your student number. The training set will be used to build the 
+      following models and the test set will be used to validate them.
+
+The set. seed() function in R is used to create reproducible results when 
+writing code that involves creating variables that take on random values. 
+By using the set. seed() function, you guarantee that the same random values 
+are produced each time you run the code
+
+Reference: Welcome to Statology
+           https://www.statology.org/
+
+```{r}
+
+dim(Assignment04_AP)
+#Here we have to spit data in 80/20 so
+samplingRate_AP <- 0.8
+nrow_AP <- nrow(Assignment04_AP)
+nrow_AP #number of row
+set.seed(8978) #my StudentID is 8828978
+training.rows_AP <- sample(1:nrow_AP, samplingRate_AP*nrow_AP, replace=FALSE)
+train_AP <- subset(Assignment04_AP[training.rows_AP,])#training set
+test_AP <- subset(Assignment04_AP[-c(training.rows_AP),])#test set
+summary(Assignment04_AP)
+summary(train_AP)
+summary(test_AP)
+
+mean(train_AP$Del_AP)
+mean(test_AP$Del_AP)
+wilcox.test(train_AP$Del_AP,test_AP$Del_AP)
+
+mean(train_AP$Vin_AP)
+mean(test_AP$Vin_AP)
+wilcox.test(train_AP$Vin_AP, test_AP$Vin_AP)
+
+mean(train_AP$Pkg_AP)
+mean(test_AP$Pkg_AP)
+wilcox.test(train_AP$Pkg_AP, test_AP$Pkg_AP)
+
+mean(train_AP$Cst_AP)
+mean(test_AP$Cst_AP)
+wilcox.test(train_AP$Cst_AP, test_AP$Cst_AP)
+
+mean(train_AP$Mil_AP)
+mean(test_AP$Mil_AP)
+wilcox.test(train_AP$Mil_AP, test_AP$Mil_AP)
+     
+
+
+
+
+
+```
+
+Conclusion: There is no significant different in mean of all variable comparing 
+Training and test set.
+Here we have used Wilcoxon Test as we are not sure that our data is normally
+distributed or not and all variables are normally distributed as p value is 
+greater than 0.05.
+
+
+2. Simple Linear Regression
+
+2(1). Correlations: Create both numeric and graphical correlations (as
+      demonstrated in class) and comment on noteworthy correlations you
+       observe. Are these surprising? Do they make sense?
+
+```{r}
+
+xyplot(Del_AP~Vin_AP, data = Assignment04_AP, col="red", pch=20)
+xyplot(Del_AP~Pkg_AP, data = Assignment04_AP, col="blue", pch=21)
+xyplot(Del_AP~Cst_AP, data = Assignment04_AP, col="black", pch=22)
+xyplot(Del_AP~Mil_AP, data = Assignment04_AP, col="orange", pch=23)
+xyplot(Vin_AP~Pkg_AP, data = Assignment04_AP, col="black", pch=24)
+xyplot(Vin_AP~Cst_AP, data = Assignment04_AP, col=1, pch=25)
+xyplot(Vin_AP~Mil_AP, data = Assignment04_AP, col=2, pch=1)
+xyplot(Pkg_AP~Cst_AP, data = Assignment04_AP, col=3, pch=2)
+xyplot(Pkg_AP~Mil_AP, data = Assignment04_AP, col=4, pch=3)
+xyplot(Cst_AP~Mil_AP, data = Assignment04_AP, col=5, pch=4)
+
+cor(Assignment04_AP$Del_AP, Assignment04_AP$Vin_AP)
+cor.test(Assignment04_AP$Del_AP, Assignment04_AP$Vin_AP, method="spearman")
+
+cor(Assignment04_AP$Del_AP, Assignment04_AP$Pkg_AP)
+cor.test(Assignment04_AP$Del_AP, Assignment04_AP$Pkg_AP, method="spearman")
+
+cor(Assignment04_AP$Del_AP, Assignment04_AP$Cst_AP)
+cor.test(Assignment04_AP$Del_AP, Assignment04_AP$Cst_AP, method="spearman")
+
+cor(Assignment04_AP$Del_AP, Assignment04_AP$Mil_AP)
+cor.test(Assignment04_AP$Del_AP, Assignment04_AP$Mil_AP, method="spearman")
+
+cor(Assignment04_AP$Vin_AP, Assignment04_AP$Pkg_AP)
+cor.test(Assignment04_AP$Vin_AP, Assignment04_AP$Pkg_AP, method="spearman")
+
+cor(Assignment04_AP$Vin_AP, Assignment04_AP$Cst_AP)
+cor.test(Assignment04_AP$Vin_AP, Assignment04_AP$Cst_AP, method="spearman")
+
+cor(Assignment04_AP$Vin_AP, Assignment04_AP$Mil_AP)
+cor.test(Assignment04_AP$Vin_AP, Assignment04_AP$Mil_AP, method="spearman")
+
+cor(Assignment04_AP$Pkg_AP, Assignment04_AP$Cst_AP)
+cor.test(Assignment04_AP$Pkg_AP, Assignment04_AP$Cst_AP, method="spearman")
+
+cor(Assignment04_AP$Pkg_AP, Assignment04_AP$Mil_AP)
+cor.test(Assignment04_AP$Pkg_AP, Assignment04_AP$Mil_AP, method="spearman")
+
+cor(Assignment04_AP$Cst_AP, Assignment04_AP$Mil_AP)
+cor.test(Assignment04_AP$Cst_AP, Assignment04_AP$Mil_AP, method="spearman")
+
+
+
+```
+Conclusion:There is moderate positive linear relationship between Del_AP and                Pkg_AP. it is quit surprising that if number of packages in order
+           increases than delivery might be late in majority of cases.
+
+           There is moderate negative linear relation between Del_AP and Cst_AP
+           which indicated that if customer has made more order than delivery 
+           time is reduced(may be they give priority to the existing customer).
+           
+           Moreover, no relationship between rest of the pairs.
+
+2. (2). Create a simple linear regression model using time for delivery as the
+dependent variable and number of packages as the independent. Create a
+scatter plot of the two variables and overlay the regression line.
+
+```{r}
+
+#Simple Linear Regression Model For Del_AP vs Pkg_AP For Training Set.
+
+slrmTrain_AP <- lm(Del_AP~Pkg_AP, data=train_AP)
+slrmTrain_AP
+
+xyplot(Del_AP~Pkg_AP, data=train_AP, panel = function(x,y) {
+  panel.xyplot(x, y)
+  panel.abline(slrmTrain_AP, col="black", lwd=3)
+}, main=list(label="Number Of Packages VS Time For Delivery (with Regression Line)",
+             cex=0.85))
+
+#for the knowledge I am plotting graphs for my model derived from Training set
+par(mfrow = c(2, 2))
+plot(slrmTrain_AP, pch=12)
+par(mfrow = c(1, 1))
+
+```
+
+
+2. (3)Create a simple linear regression model using time for delivery as the
+dependent variable and vintage of the product as the independent. Create a
+scatter plot of the two variables and overlay the regression line.
+
+```{r}
+
+#Simple Linear Regression Model For Del_AP vs Vin_AP For Training Set.
+
+slrmTrain1_AP <- lm(Del_AP~Vin_AP, data=train_AP)
+slrmTrain1_AP
+
+xyplot(Del_AP~Vin_AP, data=train_AP, panel = function(x,y) {
+  panel.xyplot(x, y)
+  panel.abline(slrmTrain1_AP, col="red", lwd=3)
+}, main=list(label="Vintage Of The Product VS Time For Delivery (with Regression Line)",
+             cex=0.85))
+
+#for the knowledge I am plotting graphs for my model derived from Training set
+par(mfrow = c(2, 2))
+plot(slrmTrain1_AP, pch=12)
+par(mfrow = c(1, 1))
+
+
+```
+
+2 (4). As demonstrated in class, compare the models (F-Stat, 𝑅2, RMSE for train
+and test, etc.) Which model is superior? Why?
+
+
+```{r}
+
+#Del_AP vs Pkg_AP
+
+slrmTest_AP <- lm(Del_AP~Pkg_AP, data=test_AP)
+slrmTest_AP
+summary(slrmTrain_AP)
+summary(slrmTest_AP)
+
+#for the knowledge I am plotting graphs for my model derived from Test set
+par(mfrow = c(2, 2))
+plot(slrmTest_AP, pch=12)
+par(mfrow = c(1, 1))
+```
+
+Conclusion: 
+For Linear Regression Model Del_AP (as dependent variable) vs Pkg_AP (as 
+independent variable).
+
+1. F-Statistics: p-value is very close to zero for the training set and test set
+                 so we can conclude that both model are reasonable or in other 
+                 words better than random guess. 
+2.Adjusted R-squared: number of packages (Pkg_AP) is able to account for 26% in
+                      variation of time for delivery (Del_AP) in Training set.
+                      on the other hand, number of packages (Pkg_AP) is able to
+                      account for 32% in Test set. 
+3.Residuals: 1st Quartile, Mean are very close to zero while 3rd Quartile is 
+             approximately 1 in both the set so in both model they are
+             symmetrical.
+             
+4.p value for T-test: Here, p value for the both set is very significant.
+5. Co-efficient: co-efficients are in same direction (positive).
+
+overall, model for training set and test set are the same but when we see
+value of adjusted r square than test set is slightly better than training set
+as it 32% of variation explained in test set.
+                      
+                      
+
+
+
+
+```{r}
+
+#Del_AP vs Vin_AP
+
+slrmTest1_AP <- lm(Del_AP~Vin_AP, data=test_AP)
+slrmTest1_AP
+summary(slrmTrain1_AP)
+summary(slrmTest1_AP)
+
+
+#for the knowledge I am plotting graphs for my model derived from Test set
+par(mfrow = c(2, 2))
+plot(slrmTest1_AP, pch=12)
+par(mfrow = c(1, 1))
+
+
+```
+
+Conclusion: 
+Linear Regression Model for Del_AP (as dependent variable) vs Vin_AP (as 
+independent variable).
+
+1. F-Statistics: here, model for training set and test set is not quite 
+                 reasonable or model has no explanatory power as p value for f 
+                 is greater than 0.05. 
+                 
+NOTE: Here, we can stop our analysis an simply conclude that model-1 is better 
+as model-2 fail F-statistidcs.However, I am keep doing analysisto see other 
+factor of model-2.
+                 
+2.Adjusted R-squared: Vin_Ap is not accountable for any changes in Del_AP as 
+                      adjusted r square for both the set is close to zero.
+3.Residuals: From Training set it seems they are symmetrical but in Test set
+             they are seems left skewed.
+4.p value for T-test: P value is significant only for intercept in both set.
+5. Co-efficient: Coefficient for the train set is positive so better than 
+                 test set as Vin_AP is negative.
+                 
+Overall, Model created for Del_AP vs Pkg_AP which is slrmTrain_AP and slrmTest_AP
+is better than other model as slrmTrain_AP and slrmTest_AP has explanatory power
+as their p value for F-Statistic is very close to zero.
+
+
+```{r}
+
+#For  Del_AP (model-1)
+predictedTrain_AP <- predict(slrmTrain_AP, newdata=train_AP)
+RMSEDelTrain_AP <- sqrt(mean(train_AP$Del_AP-predictedTrain_AP)^2)
+
+predictedTest_AP <- predict(slrmTest_AP, newdata=test_AP)
+RMSEDelTest_AP <- sqrt(mean(test_AP$Del_AP-predictedTest_AP)^2)
+
+RMSEDelTrain_AP
+RMSEDelTest_AP
+
+#let's compare our actual values and predicted values for fun.
+# here I only wanted to see 6 values so I have written 6
+head(train_AP$Del_AP,6)
+head(test_AP$Del_AP,6)
+head(predictedTrain_AP,6)
+head(predictedTest_AP,6)
+
+```
+Conclusion: When we compare RMSE for Del_AP from slrmTrain_AP and slrmTest_AP
+            (7.25745e-15 and 8.862934e-15 respectively)
+            we find they are pretty close and the closer the value the better
+            the model is.
+            
+
+
+```{r}
+
+#For Pkg_AP (model-1)
+#just for knowledge what will happen if I use another variable and find RMSE.
+
+predictedTrain1_AP <- predict(slrmTrain_AP, newdata=train_AP)
+RMSEPkgTrain_AP <- sqrt(mean(train_AP$Pkg_AP-predictedTrain1_AP)^2)
+
+predictedTest1_AP <- predict(slrmTest_AP, newdata=test_AP)
+RMSEPkgTest_AP <- sqrt(mean(test_AP$Pkg_AP-predictedTest1_AP)^2)
+
+RMSEPkgTrain_AP
+RMSEPkgTest_AP
+
+```
+Conclusion: When we compare RMSE for Pkg_AP from slrmTrain_AP and slrmTest_AP
+            we find they are pretty close and the closer the value the better
+            the model is.
+
+```{r}
+
+#For  Del_AP (model-2)
+predictedTrain2_AP <- predict(slrmTrain1_AP, newdata=train_AP)
+RMSEDelTrain1_AP <- sqrt(mean(train_AP$Del_AP-predictedTrain2_AP)^2)
+
+predictedTest2_AP <- predict(slrmTest1_AP, newdata=test_AP)
+RMSEDelTest1_AP <- sqrt(mean(test_AP$Del_AP-predictedTest2_AP)^2)
+
+RMSEDelTrain1_AP
+RMSEDelTest1_AP
+
+```
+
+```{r}
+#just for knowledge what will happen if I use another variable and find RMSE.
+#For  Vin_AP (model-2)
+
+predictedTrain3_AP <- predict(slrmTrain1_AP, newdata=train_AP)
+RMSEVinTrain1_AP <- sqrt(mean(train_AP$Vin_AP-predictedTrain3_AP)^2)
+
+predictedTest3_AP <- predict(slrmTest1_AP, newdata=test_AP)
+RMSEVinTest1_AP <- sqrt(mean(test_AP$Vin_AP-predictedTest3_AP)^2)
+
+RMSEVinTrain1_AP
+RMSEVinTest1_AP
+
+
+```
+Conclusion:
+           When we compare the RMSE for model-1 and model-2 (for Del_AP only)
+           then we can observe that model-1 is better than model-2 as RMSE is
+           close for training and test set for model-1. (7.25745e-15 and                    8.862934e-15 respectively)
+           
+Finally, we can conclude that model-1 is superior as it has explanatory power
+compare to model-2. Moreover, RMSE value also close for training and test set
+in model-1.
+
+------------------------------------------------------------------------------
+
+4. Model Development – Multivariate  
+
+As demonstrated in class, create two models, one using all the variables and
+the other using backward selection. For each model interpret and comment
+on the main measures we discussed in class (including RMSE for train and
+test). (Your commentary should be yours, not simply copied from my
+example).
+            
+NOTE: Here, I am considering Del_AP as an dependent variable with respect to
+      other variables.
+      
+Further, I call model-1 to model created using all variables
+and model-2 create by backward method
+
+```{r}
+#model-1 
+head(train_AP,4)
+#Model for all variables from Training set
+mlrmAllTrain_AP <- lm(Del_AP ~ Vin_AP + Pkg_AP + Cst_AP + Mil_AP , data=train_AP)
+mlrmAllTrain_AP
+summary(mlrmAllTrain_AP)
+
+#Model for all variables from Test set
+mlrmAllTest_AP <- lm(Del_AP ~ Vin_AP + Pkg_AP + Cst_AP + Mil_AP , data=test_AP)
+mlrmAllTest_AP
+summary(mlrmAllTest_AP)
+
+
+```
+Interpretation: model for all variable with training set.
+
+F-Statistics: p-value is close to zero so model has better explanatory power or
+              it is better than just random guess.
+              
+Adjusted R-squared: This model explain 62% of variation.
+
+Residuals: 1Q, Median, and 3Q are close to the zero so they are symmetrical.
+
+P-value for t: All the variables are highly significant except Vin_AP as 
+               its p value is higher than 0.05.
+
+Coefficients: All variable look good but Vin_AP and Cst_AP in which delivery of                time decrease as Vin_AP and Cst_AP increase.
+               
+ 
+-----------------------------------------------------------------------             
+Interpretation: model for all variable with test set.
+
+F-Statistics: P-value close to zero so model is  better than just random guess.
+
+Adjusted R-squared: 60% of variation is explained by this model.
+
+Residuals: 1Q, Median, and 3Q are close to zero so they are symmetric.
+
+P-value for t: All the variables are highly significant except Vin_AP as 
+               its p value is higher than 0.05.
+               
+Coefficients: All the variables seem fine except Cst_AP that suggest that 
+             number of number of order customer made increases then delivery
+             time decrease.
+------------------------------------------------------------------------------             
+Let's create lm model with backward method.
+
+```{r}
+
+#model-2
+
+mlrmBackAllTrain_AP <- step(mlrmAllTrain_AP, direction = "backward")
+mlrmBackAllTrain_AP
+
+mlrmBackAllTest_AP <- step(mlrmAllTest_AP, direction = "backward")
+mlrmBackAllTest_AP
+
+```
+Interpretation: For Training set data
+
+In first step: if it drops nothing then AIC is 3.36
+               and if it drops Vin_AP then AIC is 2.24 which is better option
+               as lower the AIC, better the model will be.
+              
+In second Step: If it drops nothing then we get lowest AIC value (2.24) so 
+                It is our best model without dropping any variable.
+                
+--------------------------------------------------------------------------                
+Interpretation: For Test set data
+
+In First Step: If it is drop nothing then we get AIC=20.404 and which is better                 option as lower the AIC value the better the model is.
+ 
+
+```{r}
+
+summary(mlrmBackAllTrain_AP)
+summary(mlrmBackAllTest_AP)
+
+
+```
+Interpretation: model for backward selection with training set.
+
+F-Statistics: p-value is close to zero so model has better explanatory power or
+              it is better than just random guess.
+              
+Adjusted R-squared: This model explain 62% of variation.
+
+Residuals: 1Q, Median, and 3Q are close to the zero so they are symmetrical.
+
+P-value for t: All the variables are highly significant as their p value is 
+               close to zero.
+               
+Coefficients: All the variables seem fine except Cst_AP that suggest that 
+              number of number of order customer made increases then delivery
+              time decrease.
+             
+----------------------------------------------------------------------
+
+Interpretation: model for backward selection with test set.
+
+F-Statistics: p-value is close to zero so model has better explanatory power or
+              it is better than just random guess.
+              
+Adjusted R-squared: This model explain 60% of variation.
+
+Residuals: 1Q, Median, and 3Q are close to the zero so they are symmetrical.
+
+P-value for t: All the variables are highly significant except Vin_AP as 
+               its p value is higher than 0.05.
+               
+Coefficients: All the variables seem fine except Cst_AP that suggest that 
+             number of number of order customer made increases then delivery
+             time decrease. 
+
+------------------------------------------------------------------------
+
+RMSE For Training and Test Set.
+
+
+
+```{r}
+
+# for model-1
+predictAllTrain_AP <- predict(mlrmAllTrain_AP, newdata=train_AP)
+predictAllTest_AP <- predict(mlrmAllTest_AP, newdata=test_AP)
+
+RMSEAllTrain_AP <- sqrt(mean(train_AP$Del_AP - predictAllTrain_AP)^2)
+RMSEAllTest_AP <-sqrt(mean(test_AP$Del_AP - predictAllTest_AP)^2)
+RMSEAllTrain_AP
+RMSEAllTest_AP
+
+#for model-2
+predictBackAllTrain_AP <- predict(mlrmBackAllTrain_AP, newdata = train_AP)
+predictBackAllTest_AP  <- predict(mlrmBackAllTest_AP, newdata = test_AP)
+
+RMSEBackAllTrain_AP <- sqrt(mean(train_AP$Del_AP - predictBackAllTrain_AP)^2)
+RMSEBackAllTest_AP <- sqrt(mean(test_AP$Del_AP - predictBackAllTest_AP)^2)
+RMSEBackAllTrain_AP
+RMSEBackAllTest_AP
+
+#just for experiment with other variables
+#RMSEAllTrain_AP2 <- sqrt(mean(train_AP$Vin_AP - predictAllTrain_AP)^2)
+#RMSEAllTrain_AP3 <- sqrt(mean(train_AP$Del_AP - predictAllTrain_AP)^2)
+#RMSEAllTrain_AP4 <- sqrt(mean(train_AP$Del_AP - predictAllTrain_AP)^2)
+#RMSEAllTrain_AP5 <- sqrt(mean(train_AP$Del_AP - predictAllTrain_AP)^2)
+
+
+
+```
+RMSE for Training set for model which involve all numeric variable:1.384492e-15
+RMSE for Test set for model which involve all numeric variable:5.279362e-15
+
+RMSE for Training set for model which involve backward selection:2.197082e-16
+RMSE for Test set for model which involve backward selection:5.279362e-15
+
+From RMSE values of both models for training and test set, we can say that
+model with all variable(model-1) is better than model with backward method (model-2) as RMSE between training and test are relatively close.
+
+--------------------------------------------------------------------------------
+
+Q5. Model Evaluation – Verifying Assumptions - Multivariate 
+    For both models created in Step 4, evaluate the main assumptions of
+    regression (for example, Error terms mean of zero, constant variance and
+    normally distributed, etc.)
+    
+    
+    
+```{r}
+#plot-1
+par(mfrow = c(2, 2))  
+plot(mlrmAllTrain_AP)  
+par(mfrow = c(1, 1)) 
+
+#plot-2
+par(mfrow = c(2, 2))  
+plot(mlrmAllTest_AP)  
+par(mfrow = c(1, 1))
+
+#plot-3
+par(mfrow = c(2, 2))  
+plot(mlrmBackAllTrain_AP)  
+par(mfrow = c(1, 1))  
+
+#plot-4
+par(mfrow = c(2, 2))  
+plot(mlrmBackAllTest_AP)  
+par(mfrow = c(1, 1))
+
+```
+
+NOTE: here, All the plots interpret as same way.
+
+1.Residual should have mean of zero:
+  from upper left graph, residual are close to zero 
+2.There should not have any kind of pattern that means non-autocorrelation:
+  from upper left graph, we can see there is no specific pattern followed
+  by residuals.
+3. Distribution of Error Terms:
+  ANS: so from above graphs in upper right hand side we can see all
+       the points are on the line or close to the line so they are 
+       normally distributed.
+4. Homoscedasticity of Error Terms:from upper left graph, Variance is constant     as we draw the horizontal line at 4 and -4 line then most of the points are
+  between those line.
+  
+  
+Observation from above plots.
+Plot-1: 
+Some point with high influence: 27, 32, 1460
+
+Plot-2:
+Some point with high influence: 574,1367
+659 with high leverage but low influence
+
+--------------------------------------------------------------------------
+
+Q6.Final Recommendation - Multivariate 
+Based on your preceding analysis, recommend which of the two models from
+step 4 should be used and why.
+
+Answer: I would say backward method model (model-2) is better than model which          consist all the variables (model-1) as backward method model is better          in terms of coefficient and t value than other model. Moreover, it is           relatively small.However, if we consider RMSE value than model with all         variable has some edge compare to RMSE value of model with backward             method.
+
+----------------------------------------------------------------------------
+
+References:
+
+David Marsh.(2022).[PROG8430-L05-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L06-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L07-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L08-22F].eConestoga.
+
+David Marsh.(2022).[PROG8430-L09-22F].eConestoga.
+
+David Marsh.(2022).[R Documents].eConestoga.
+
+8 methods to find outliers in R (with examples)
+  Bedre
+  https://www.reneshbedre.com/blog/find-outliers.html
+
+Welcome to Statology
+  https://www.statology.org/
+
+
